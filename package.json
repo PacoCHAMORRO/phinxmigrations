@@ -16,8 +16,31 @@
       {
         "command": "phinxmigrations.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "phinxmigrations.runMigrations",
+        "title": "Run Migrations"
+      },
+      {
+        "command": "phinxmigrations.selectPhinxPath",
+        "title": "Select Phinx Path"
+      },
+      {
+        "command": "phinxmigrations.runRollback",
+        "title": "Rollback Phinx Migration"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Phinx Configuration",
+      "properties": {
+          "phinx.path": {
+              "type": "string",
+              "default": "vendor/bin/phinx",
+              "description": "Path to the Phinx installation"
+          }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

@@ -1,35 +1,44 @@
-# phinxmigrations README
+# Phinx VS Code Extension
 
-This is the README for your extension "phinxmigrations". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension to easily run Phinx migrations within your projects. This extension allows you to configure the path to your Phinx installation and execute migration commands directly from the VS Code interface.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Configure Phinx Path**: Prompt the user to set the path to their Phinx installation (e.g., `vendor/bin/phinx`).
+- **Run Migrations**: Execute Phinx migration command.
+- **Run Rollbacks**: Execute Phinx rollback command.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Ensure you have [Phinx](https://phinx.org/) installed in your project.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- `phinx.path`: Specifies the path to the Phinx installation.
 
-## Known Issues
+Example `settings.json` configuration:
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+```json
+{
+  "phinx.path": "vendor/bin/phinx"
+}
+```
+
+## Usage
+
+### Configure the Phinx Path
+
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
+2. Type `Phinx: Select Phinx Path` and press `Enter`.
+3. Enter the path to your Phinx installation (e.g., `vendor/bin/phinx`).
+
+### Run Migrations
+
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
+2. Type `Phinx: Run Migrations` and press `Enter`.
+3. The extension will execute the `phinx migrate` command from the root of your workspace and display the output.
 
 ## Release Notes
 
@@ -48,24 +57,3 @@ Fixed issue #.
 Added features X, Y, and Z.
 
 ---
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**

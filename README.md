@@ -7,6 +7,7 @@ A Visual Studio Code extension to easily run Phinx migrations within your projec
 - **Configure Phinx Path**: Prompt the user to set the path to their Phinx installation (e.g., `vendor/bin/phinx`).
 - **Run Migrations**: Execute Phinx migration command.
 - **Run Rollbacks**: Execute Phinx rollback command.
+- **Create Migrations**: Execute Phinx create command.
 
 ## Requirements
 

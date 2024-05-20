@@ -28,6 +28,10 @@
       {
         "command": "phinxmigrations.runRollback",
         "title": "Rollback Phinx Migration"
+      },
+      {
+        "command": "phinxmigrations.createMigration",
+        "title": "Create Phinx Migration"
       }
     ],
     "configuration": {

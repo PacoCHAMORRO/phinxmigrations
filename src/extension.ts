@@ -78,6 +78,41 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	disposable = vscode.commands.registerCommand('phinxmigrations.createMigration', async () => {
+		if (!workspaceRoot) {
+			vscode.window.showErrorMessage('No workspace is open.');
+			return;
+		}
+
+		const config = vscode.workspace.getConfiguration('phinx');
+		const phinxPath = config.get<string>('path', 'vendor/bin/phinx');
+
+		if (!phinxPath) {
+			vscode.window.showErrorMessage('Phinx path is not set. Please configure the path first.');
+		}
+
+		const migrationName = await vscode.window.showInputBox({
+			prompt: 'Migration name:',
+			placeHolder: 'MyNewMigration'
+		});
+
+		if (!migrationName) {
+			vscode.window.showErrorMessage('Invalid migration name.');
+			return;
+		}
+
+		cp.exec(`${phinxPath} create ${migrationName}`, {cwd: workspaceRoot}, (err, stdout, stderr) => {
+			if (err) {
+				vscode.window.showErrorMessage(`Error running Phinx create: ${stderr}`);
+				;
+			}
+
+			vscode.window.showInformationMessage(`Phinx create output: ${stdout}`);
+		});
+	});
+
+	context.subscriptions.push(disposable);
 }
 
 function getWorkspaceRoot(): string | undefined {

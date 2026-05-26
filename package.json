@@ -1,68 +1,80 @@
 {
-  "name": "phinxmigrations",
-  "displayName": "phinxMigrations",
-  "description": "Manage phinx migrations",
-  "version": "0.0.1",
+  "name": "phinx-migration-helper",
+  "displayName": "Phinx Migration Helper",
+  "description": "Execute Phinx migration commands directly from VSCode, with optional Docker support.",
+  "version": "1.0.0",
   "engines": {
-    "vscode": "^1.89.0"
+    "vscode": "^1.60.0"
   },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
-  "main": "./out/extension.js",
+  "categories": ["Other"],
+  "activationEvents": ["workspaceContains:composer.json"],
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "phinxmigrations.helloWorld",
-        "title": "Hello World"
+        "command": "phinx.createMigration",
+        "title": "Phinx: Create Migration"
       },
       {
-        "command": "phinxmigrations.runMigrations",
-        "title": "Run Migrations"
+        "command": "phinx.migrate",
+        "title": "Phinx: Migrate"
       },
       {
-        "command": "phinxmigrations.selectPhinxPath",
-        "title": "Select Phinx Path"
-      },
-      {
-        "command": "phinxmigrations.runRollback",
-        "title": "Rollback Phinx Migration"
-      },
-      {
-        "command": "phinxmigrations.createMigration",
-        "title": "Create Phinx Migration"
+        "command": "phinx.rollback",
+        "title": "Phinx: Rollback"
       }
     ],
     "configuration": {
-      "type": "object",
-      "title": "Phinx Configuration",
+      "title": "Phinx Migration Helper",
       "properties": {
-          "phinx.path": {
-              "type": "string",
-              "default": "vendor/bin/phinx",
-              "description": "Path to the Phinx installation"
-          }
+        "phinx.useDocker": {
+          "type": "boolean",
+          "default": false,
+          "description": "Execute commands inside a Docker container"
+        },
+        "phinx.dockerMethod": {
+          "type": "string",
+          "enum": ["docker-compose", "docker"],
+          "default": "docker-compose",
+          "description": "Method to execute in Docker: 'docker-compose' or 'docker exec'"
+        },
+        "phinx.dockerContainer": {
+          "type": "string",
+          "default": "php-fpm",
+          "description": "Name of the Docker container (e.g., php-fpm, app, web)"
+        },
+        "phinx.dockerComposeService": {
+          "type": "string",
+          "default": "php-fpm",
+          "description": "Name of the service in docker-compose.yml"
+        },
+        "phinx.phinxPath": {
+          "type": "string",
+          "default": "composer_modules/bin/phinx",
+          "description": "Path to phinx (relative to the project root)"
+        },
+        "phinx.workingDirectory": {
+          "type": "string",
+          "default": "./",
+          "description": "Working directory inside the container"
+        },
+        "phinx.migrationsDirectory": {
+          "type": "string",
+          "default": "db/migrations",
+          "description": "Path to the migrations directory"
+        }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.89.0",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
-    "@typescript-eslint/parser": "^7.7.1",
-    "eslint": "^8.57.0",
-    "typescript": "^5.4.5",
-    "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.3.9"
+    "@types/vscode": "^1.60.0",
+    "@types/node": "^14.0.0",
+    "@types/mocha": "^9.0.0",
+    "typescript": "^4.0.0"
   }
 }

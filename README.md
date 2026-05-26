@@ -1,71 +1,107 @@
-# phinxmigrations README
+# Phinx Migration Helper
 
-This is the README for your extension "phinxmigrations". After writing up a brief description, we recommend including the following sections.
+A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you to create, execute, and rollback migrations directly from the editor.
 
-## Features
+## 🚀 Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- 📝 **Create Migration** - Create new migrations with name validation
+- ⬆️ **Migrate** - Execute all pending migrations
+- ⬇️ **Rollback** - Revert the last executed migration
+- 🐳 **Docker Support** - Compatible with `docker-compose` and `docker exec`
+- 🎯 **Auto-open** - Automatically opens the created migration file
+- ⚙️ **Configurable** - Per-project customization
 
-For example if there is an image subfolder under your extension project workspace:
+## 📋 Requirements
 
-\!\[feature X\]\(images/feature-x.png\)
+- VSCode 1.60.0 or higher
+- Project with **Phinx** installed via Composer
+- `composer_modules/bin/phinx` available in project root
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## 📦 Installation
 
-## Requirements
+1. Download the `.vsix` file from releases
+2. In VSCode: `Extensions` → `Install from VSIX` → select the file
+3. Done! The extension will activate automatically
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## 🎯 Usage
 
-## Extension Settings
+Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see available commands:
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### Create Migration
+- Opens a dialog to enter the migration name
+- Creates the migration in `db/migrations/`
+- **Automatically opens the created file**
 
-For example:
+### Migrate
+- Executes all pending migrations
+- Asks for confirmation before running
 
-This extension contributes the following settings:
+### Rollback
+- Reverts the last migration
+- Asks for confirmation before running
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## ⚙️ Configuration
 
-## Known Issues
+### Option 1: Without Docker (Local Execution)
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+```json
+{
+	"phinx.useDocker": false,
+  "phinx.phinxPath": "composer_modules/bin/phinx"
+}
+```
 
-## Release Notes
+### Option 2: With Docker Compose
+```json
+{
+  "phinx.useDocker": true,
+  "phinx.dockerMethod": "docker-compose",
+  "phinx.dockerComposeService": "php-fpm",
+  "phinx.phinxPath": "composer_modules/bin/phinx"
+}
+```
+### Option 3: With Docker Exec
+```json
+{
+  "phinx.useDocker": true,
+  "phinx.dockerMethod": "docker",
+  "phinx.dockerComposeService": "php-fpm",
+  "phinx.phinxPath": "composer_modules/bin/phinx"
+}
+```
 
-Users appreciate release notes as you update your extension.
+### Configuration Options
 
-### 1.0.0
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `phinx.useDocker` | boolean | `false` | Execute commands inside Docker |
+| `phinx.dockerMethod` | string | `docker-compose` | Method: `docker-compose` or `docker` |
+| `phinx.dockerContainer` | string | `php-fpm` | Docker container name |
+| `phinx.dockerComposeService` | string | `php-fpm` | Service name in docker-compose.yml |
+| `phinx.phinxPath` | string | `composer_modules/bin/phinx` | Path to phinx |
+| `phinx.workingDirectory` | string | `/app` | Working directory in container |
 
-Initial release of ...
+## 🐛 Troubleshooting
 
-### 1.0.1
+### "No workspace folder open"
+- Make sure to open your project in VSCode as a folder (`File` → `Open Folder`)
 
-Fixed issue #.
+### "Command not found: composer_modules/bin/phinx"
+- Verify Phinx is installed: `ls composer_modules/bin/phinx`
+- Update the `phinx.phinxPath` setting in `.vscode/settings.json`
 
-### 1.1.0
+### With Docker: "cannot find path"
+- Verify volumes are correctly configured in `docker-compose.yml`
+- The project should be mounted at `/app` (or adjust `phinx.workingDirectory`)
 
-Added features X, Y, and Z.
+### File doesn't open automatically
+- Verify that the `db/migrations/` folder exists
+- Open Developer Console (`Ctrl+Shift+I`) to check debug logs
 
----
+## 📄 License
 
-## Following extension guidelines
+MIT
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+## 👤 Contributing
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Contributions are welcome. Please open an issue or pull request.

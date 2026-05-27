@@ -17,12 +17,6 @@ A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you t
 - Project with **Phinx** installed via Composer
 - `composer_modules/bin/phinx` available in project root
 
-## 📦 Installation
-
-1. Download the `.vsix` file from releases
-2. In VSCode: `Extensions` → `Install from VSIX` → select the file
-3. Done! The extension will activate automatically
-
 ## 🎯 Usage
 
 Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see available commands:
@@ -46,7 +40,7 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see availabl
 
 ```json
 {
-	"phinx.useDocker": false,
+  "phinx.useDocker": false,
   "phinx.phinxPath": "composer_modules/bin/phinx"
 }
 ```

@@ -1,5 +1,6 @@
 {
   "name": "phinx-migration-helper",
+  "publisher": "PacoChamorroFierro",
   "displayName": "Phinx Migration Helper",
   "description": "Execute Phinx migration commands directly from VSCode, with optional Docker support.",
   "version": "1.0.0",

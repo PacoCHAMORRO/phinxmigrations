@@ -3,7 +3,7 @@
   "publisher": "PacoChamorroFierro",
   "displayName": "Phinx Migration Helper",
   "description": "Execute Phinx migration commands directly from VSCode, with optional Docker support.",
-  "version": "1.0.0",
+  "version": "1.0.1",
    "repository": {
     "type": "git",
     "url": "https://github.com/PacoCHAMORRO/phinxmigrations.git"

@@ -1,60 +1,107 @@
-# Phinx VS Code Extension
+# Phinx Migration Helper
 
-A Visual Studio Code extension to easily run Phinx migrations within your projects. This extension allows you to configure the path to your Phinx installation and execute migration commands directly from the VS Code interface.
+A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you to create, execute, and rollback migrations directly from the editor.
 
-## Features
+## 🚀 Features
 
-- **Configure Phinx Path**: Prompt the user to set the path to their Phinx installation (e.g., `vendor/bin/phinx`).
-- **Run Migrations**: Execute Phinx migration command.
-- **Run Rollbacks**: Execute Phinx rollback command.
-- **Create Migrations**: Execute Phinx create command.
+- 📝 **Create Migration** - Create new migrations with name validation
+- ⬆️ **Migrate** - Execute all pending migrations
+- ⬇️ **Rollback** - Revert the last executed migration
+- 🐳 **Docker Support** - Compatible with `docker-compose` and `docker exec`
+- 🎯 **Auto-open** - Automatically opens the created migration file
+- ⚙️ **Configurable** - Per-project customization
 
-## Requirements
+## 📋 Requirements
 
-Ensure you have [Phinx](https://phinx.org/) installed in your project.
+- VSCode 1.60.0 or higher
+- Project with **Phinx** installed via Composer
+- `composer_modules/bin/phinx` available in project root
 
-## Extension Settings
+## 📦 Installation
 
-This extension contributes the following settings:
+1. Download the `.vsix` file from releases
+2. In VSCode: `Extensions` → `Install from VSIX` → select the file
+3. Done! The extension will activate automatically
 
-- `phinx.path`: Specifies the path to the Phinx installation.
+## 🎯 Usage
 
-Example `settings.json` configuration:
+Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see available commands:
+
+### Create Migration
+- Opens a dialog to enter the migration name
+- Creates the migration in `db/migrations/`
+- **Automatically opens the created file**
+
+### Migrate
+- Executes all pending migrations
+- Asks for confirmation before running
+
+### Rollback
+- Reverts the last migration
+- Asks for confirmation before running
+
+## ⚙️ Configuration
+
+### Option 1: Without Docker (Local Execution)
 
 ```json
 {
-  "phinx.path": "vendor/bin/phinx"
+	"phinx.useDocker": false,
+  "phinx.phinxPath": "composer_modules/bin/phinx"
 }
 ```
 
-## Usage
+### Option 2: With Docker Compose
+```json
+{
+  "phinx.useDocker": true,
+  "phinx.dockerMethod": "docker-compose",
+  "phinx.dockerComposeService": "php-fpm",
+  "phinx.phinxPath": "composer_modules/bin/phinx"
+}
+```
+### Option 3: With Docker Exec
+```json
+{
+  "phinx.useDocker": true,
+  "phinx.dockerMethod": "docker",
+  "phinx.dockerComposeService": "php-fpm",
+  "phinx.phinxPath": "composer_modules/bin/phinx"
+}
+```
 
-### Configure the Phinx Path
+### Configuration Options
 
-1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
-2. Type `Phinx: Select Phinx Path` and press `Enter`.
-3. Enter the path to your Phinx installation (e.g., `vendor/bin/phinx`).
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `phinx.useDocker` | boolean | `false` | Execute commands inside Docker |
+| `phinx.dockerMethod` | string | `docker-compose` | Method: `docker-compose` or `docker` |
+| `phinx.dockerContainer` | string | `php-fpm` | Docker container name |
+| `phinx.dockerComposeService` | string | `php-fpm` | Service name in docker-compose.yml |
+| `phinx.phinxPath` | string | `composer_modules/bin/phinx` | Path to phinx |
+| `phinx.workingDirectory` | string | `/app` | Working directory in container |
 
-### Run Migrations
+## 🐛 Troubleshooting
 
-1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS).
-2. Type `Phinx: Run Migrations` and press `Enter`.
-3. The extension will execute the `phinx migrate` command from the root of your workspace and display the output.
+### "No workspace folder open"
+- Make sure to open your project in VSCode as a folder (`File` → `Open Folder`)
 
-## Release Notes
+### "Command not found: composer_modules/bin/phinx"
+- Verify Phinx is installed: `ls composer_modules/bin/phinx`
+- Update the `phinx.phinxPath` setting in `.vscode/settings.json`
 
-Users appreciate release notes as you update your extension.
+### With Docker: "cannot find path"
+- Verify volumes are correctly configured in `docker-compose.yml`
+- The project should be mounted at `/app` (or adjust `phinx.workingDirectory`)
 
-### 1.0.0
+### File doesn't open automatically
+- Verify that the `db/migrations/` folder exists
+- Open Developer Console (`Ctrl+Shift+I`) to check debug logs
 
-Initial release of ...
+## 📄 License
 
-### 1.0.1
+MIT
 
-Fixed issue #.
+## 👤 Contributing
 
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
+Contributions are welcome. Please open an issue or pull request.

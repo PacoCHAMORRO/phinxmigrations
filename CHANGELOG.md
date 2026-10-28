@@ -4,7 +4,7 @@ All notable changes to the "phinxmigrations" extension will be documented in thi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [1.2.0]
 
 ### Added
 - Syntax highlighting in the **Phinx** output panel: applied and pending migrations, missing files, warnings, errors and exit codes are shown in color.

@@ -1,0 +1,116 @@
+{
+  "name": "Phinx Output",
+  "scopeName": "source.phinx-output",
+  "patterns": [
+    { "include": "#run-header" },
+    { "include": "#run-command" },
+    { "include": "#exit-code" },
+    { "include": "#migration-progress" },
+    { "include": "#status-row" },
+    { "include": "#missing" },
+    { "include": "#created" },
+    { "include": "#done" },
+    { "include": "#warning" },
+    { "include": "#error" }
+  ],
+  "repository": {
+    "run-header": {
+      "comment": "[10:32:05] Running migrations",
+      "match": "^(\\[[^\\]]+\\])\\s+(.*)$",
+      "captures": {
+        "1": { "name": "comment.line.timestamp.phinx-output" },
+        "2": { "name": "markup.heading.phinx-output" }
+      }
+    },
+    "run-command": {
+      "comment": "$ vendor/bin/phinx migrate",
+      "match": "^\\$\\s.*$",
+      "name": "comment.line.command.phinx-output"
+    },
+    "exit-code": {
+      "patterns": [
+        {
+          "match": "^Process exited with code 0$",
+          "name": "markup.inserted.phinx-output"
+        },
+        {
+          "comment": "Status exit codes 2 (missing) and 3 (pending) are warnings, not failures",
+          "match": "^Process exited with code [23]$",
+          "name": "token.warn-token.phinx-output"
+        },
+        {
+          "match": "^Process exited with code .*$",
+          "name": "token.error-token.phinx-output"
+        }
+      ]
+    },
+    "migration-progress": {
+      "comment": "== 20240101000000 CreateUsersTable: migrated 0.0123s",
+      "match": "^\\s*(==)\\s+(\\d+)\\s+(\\w+):\\s+(?:(migrated|reverted)|(migrating|reverting))(.*)$",
+      "captures": {
+        "1": { "name": "punctuation.definition.phinx-output" },
+        "2": { "name": "constant.numeric.migration-id.phinx-output" },
+        "3": { "name": "entity.name.type.migration-name.phinx-output" },
+        "4": { "name": "markup.inserted.phinx-output" },
+        "5": { "name": "comment.phinx-output" },
+        "6": { "name": "comment.phinx-output" }
+      }
+    },
+    "status-row": {
+      "comment": "     up  20240101000000  2024-01-01 10:00:00  2024-01-01 10:00:00  CreateUsersTable",
+      "match": "^\\s*(?:(up)|(down))\\s+(\\d+)\\b",
+      "captures": {
+        "1": { "name": "markup.inserted.phinx-output" },
+        "2": { "name": "token.warn-token.phinx-output" },
+        "3": { "name": "constant.numeric.migration-id.phinx-output" }
+      }
+    },
+    "missing": {
+      "comment": "** MISSING MIGRATION FILE **",
+      "match": "\\*\\*\\s*MISSING[^*]*\\*\\*",
+      "name": "token.error-token.phinx-output"
+    },
+    "created": {
+      "comment": "created db/migrations/20240101000000_create_users_table.php",
+      "match": "^(created)\\s+(.*)$",
+      "captures": {
+        "1": { "name": "markup.inserted.phinx-output" },
+        "2": { "name": "string.unquoted.path.phinx-output" }
+      }
+    },
+    "done": {
+      "match": "^All Done\\..*$",
+      "name": "markup.inserted.phinx-output"
+    },
+    "warning": {
+      "match": "^\\s*warning\\b.*$",
+      "name": "token.warn-token.phinx-output"
+    },
+    "error": {
+      "patterns": [
+        {
+          "comment": "Symfony console error header: In PDOConnection.php line 12:",
+          "match": "^\\s*In \\S+ line \\d+:\\s*$",
+          "name": "token.error-token.phinx-output"
+        },
+        {
+          "match": "^\\s*\\[[\\w\\\\]*(?:Exception|Error)\\]\\s*$",
+          "name": "token.error-token.phinx-output"
+        },
+        {
+          "match": "SQLSTATE\\[\\w+\\].*$",
+          "name": "token.error-token.phinx-output"
+        },
+        {
+          "match": "^\\s*(?:Fatal error|PHP Fatal error|Error):.*$",
+          "name": "token.error-token.phinx-output"
+        },
+        {
+          "comment": "Shell/docker failures such as 'command not found' or 'No such container'",
+          "match": "^.*(?:command not found|No such file or directory|No such container|is not running).*$",
+          "name": "token.error-token.phinx-output"
+        }
+      ]
+    }
+  }
+}

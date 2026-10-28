@@ -33,7 +33,7 @@ const STATUS_DOWN = 3;
 let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel = vscode.window.createOutputChannel('Phinx');
+  outputChannel = vscode.window.createOutputChannel('Phinx', 'phinx-output');
   context.subscriptions.push(outputChannel);
 
   let createDisposable = vscode.commands.registerCommand(

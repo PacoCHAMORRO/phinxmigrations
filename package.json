@@ -10,12 +10,25 @@
     "url": "https://github.com/PacoCHAMORRO/phinxmigrations.git"
   },
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.67.0"
   },
   "categories": ["Other"],
   "activationEvents": ["workspaceContains:composer.json"],
   "main": "./dist/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "phinx-output",
+        "aliases": ["Phinx Output"]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "phinx-output",
+        "scopeName": "source.phinx-output",
+        "path": "./syntaxes/phinx-output.tmLanguage.json"
+      }
+    ],
     "commands": [
       {
         "command": "phinx.createMigration",
@@ -82,7 +95,7 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.60.0",
+    "@types/vscode": "^1.67.0",
     "@types/node": "^14.0.0",
     "@types/mocha": "^9.0.0",
     "typescript": "^4.0.0"

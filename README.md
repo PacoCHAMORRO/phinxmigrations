@@ -15,7 +15,7 @@ A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you t
 
 ## 📋 Requirements
 
-- VSCode 1.60.0 or higher
+- VSCode 1.67.0 or higher
 - Project with **Phinx** installed via Composer
 - `composer_modules/bin/phinx` available in project root
 

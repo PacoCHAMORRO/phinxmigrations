@@ -24,6 +24,8 @@ interface RunOptions {
   successCodes?: number[];
   // Skip the done/failed notification so the caller can show its own
   silent?: boolean;
+  // Rewrites the output before it is shown; the output is buffered instead of streamed
+  filterOutput?: (output: string) => string;
 }
 
 // Exit codes returned by `phinx status`
@@ -127,7 +129,7 @@ async function status() {
   const result = await runPhinx(
     `${getConfig().phinxPath} status`,
     'Checking migration status',
-    { successCodes: [0, STATUS_MISSING, STATUS_DOWN], silent: true }
+    { successCodes: [0, STATUS_MISSING, STATUS_DOWN], silent: true, filterOutput: hideAppliedMigrations }
   );
 
   if (!result.success) {
@@ -161,6 +163,20 @@ async function status() {
   } else if (action === 'Show output') {
     outputChannel.show();
   }
+}
+
+// Removes the `up` rows from the `phinx status` table, keeping the ones whose file is missing
+function hideAppliedMigrations(output: string): string {
+  const lines = output.split('\n');
+  const kept = lines.filter(line => !/^\s*up\s+\d+/.test(line) || /\*\*\s*MISSING/.test(line));
+  const hidden = lines.length - kept.length;
+
+  if (hidden === 0) {
+    return output;
+  }
+
+  const text = kept.join('\n');
+  return `${text}${text.endsWith('\n') ? '' : '\n'}(${hidden} applied migration${hidden === 1 ? '' : 's'} hidden)\n`;
 }
 
 function buildCommand(command: string, config: PhinxConfig): string {
@@ -212,18 +228,28 @@ async function runPhinx(
       const onData = (data: Buffer) => {
         const text = data.toString();
         output += text;
-        outputChannel.append(text);
+        if (!options.filterOutput) {
+          outputChannel.append(text);
+        }
+      };
+
+      const flushFiltered = () => {
+        if (options.filterOutput) {
+          outputChannel.append(options.filterOutput(output));
+        }
       };
 
       child.stdout.on('data', onData);
       child.stderr.on('data', onData);
 
       child.on('error', (error) => {
+        flushFiltered();
         outputChannel.appendLine(error.message);
         resolve({ success: false, exitCode: null, output });
       });
 
       child.on('close', (code) => {
+        flushFiltered();
         outputChannel.appendLine(`Process exited with code ${code}`);
         resolve({ success: code !== null && successCodes.includes(code), exitCode: code, output });
       });

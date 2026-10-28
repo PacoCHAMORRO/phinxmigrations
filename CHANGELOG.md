@@ -11,6 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Changed
 - Requires VS Code 1.67 or later.
+- **Phinx: Status** only lists pending migrations and migrations whose file is missing. Applied migrations are hidden.
 
 ## [1.1.0]
 

@@ -8,6 +8,7 @@ A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you t
 - ⬆️ **Migrate** - Execute all pending migrations
 - ⬇️ **Rollback** - Revert the last executed migration
 - 📊 **Status** - Show which migrations are up and which are pending
+- 📺 **Live feedback** - Command output streams to a single **Phinx** output panel, with a progress notification and a success or error message when it finishes
 - 🐳 **Docker Support** - Compatible with `docker-compose` and `docker exec`
 - 🎯 **Auto-open** - Automatically opens the created migration file
 - ⚙️ **Configurable** - Per-project customization
@@ -20,12 +21,14 @@ A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you t
 
 ## 🎯 Usage
 
-Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see available commands:
+Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see available commands.
+
+Every command writes its output to the **Phinx** output panel (`View` → `Output`, then pick "Phinx"). A notification shows while it runs, and when it finishes you get a ✅ or ❌ message. If it fails, click **Show output** to see the error.
 
 ### Create Migration
 - Opens a dialog to enter the migration name
-- Creates the migration in `db/migrations/`
-- **Automatically opens the created file**
+- Creates the migration in `phinx.migrationsDirectory` (`db/migrations` by default)
+- **Automatically opens the created file** if the command succeeds
 
 ### Migrate
 - Executes all pending migrations
@@ -64,7 +67,7 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see availabl
 {
   "phinx.useDocker": true,
   "phinx.dockerMethod": "docker",
-  "phinx.dockerComposeService": "php-fpm",
+  "phinx.dockerContainer": "php-fpm",
   "phinx.phinxPath": "composer_modules/bin/phinx"
 }
 ```
@@ -78,7 +81,8 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see availabl
 | `phinx.dockerContainer` | string | `php-fpm` | Docker container name |
 | `phinx.dockerComposeService` | string | `php-fpm` | Service name in docker-compose.yml |
 | `phinx.phinxPath` | string | `composer_modules/bin/phinx` | Path to phinx |
-| `phinx.workingDirectory` | string | `/app` | Working directory in container |
+| `phinx.migrationsDirectory` | string | `db/migrations` | Migrations directory (relative to the project root) |
+| `phinx.workingDirectory` | string | `./` | Working directory in container (not used yet) |
 
 ## 🐛 Troubleshooting
 
@@ -91,11 +95,14 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see availabl
 
 ### With Docker: "cannot find path"
 - Verify volumes are correctly configured in `docker-compose.yml`
-- The project should be mounted at `/app` (or adjust `phinx.workingDirectory`)
+- Commands run in the container's default working directory, so `phinx.phinxPath` must be valid from there
+
+### A command fails
+- Open the **Phinx** output panel to see the full Phinx output and the exit code
 
 ### File doesn't open automatically
-- Verify that the `db/migrations/` folder exists
-- Open Developer Console (`Ctrl+Shift+I`) to check debug logs
+- Verify that the folder in `phinx.migrationsDirectory` exists on your machine (not only inside the container)
+- Check the **Phinx** output panel to confirm the migration was created
 
 ## 📄 License
 

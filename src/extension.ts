@@ -15,8 +15,20 @@ interface PhinxConfig {
 
 interface CommandResult {
   success: boolean;
+  exitCode: number | null;
   output: string;
 }
+
+interface RunOptions {
+  // Exit codes considered successful (phinx status uses 2 and 3 for missing/pending migrations)
+  successCodes?: number[];
+  // Skip the done/failed notification so the caller can show its own
+  silent?: boolean;
+}
+
+// Exit codes returned by `phinx status`
+const STATUS_MISSING = 2;
+const STATUS_DOWN = 3;
 
 let outputChannel: vscode.OutputChannel;
 
@@ -39,7 +51,12 @@ export function activate(context: vscode.ExtensionContext) {
     rollback
   );
 
-  context.subscriptions.push(createDisposable, migrateDisposable, rollbackDisposable);
+  let statusDisposable = vscode.commands.registerCommand(
+    'phinx.status',
+    status
+  );
+
+  context.subscriptions.push(createDisposable, migrateDisposable, rollbackDisposable, statusDisposable);
 }
 
 function getConfig(): PhinxConfig {
@@ -106,6 +123,46 @@ async function rollback() {
   }
 }
 
+async function status() {
+  const result = await runPhinx(
+    `${getConfig().phinxPath} status`,
+    'Checking migration status',
+    { successCodes: [0, STATUS_MISSING, STATUS_DOWN], silent: true }
+  );
+
+  if (!result.success) {
+    return;
+  }
+
+  if (result.exitCode === 0) {
+    vscode.window.showInformationMessage('✅ All migrations are up to date');
+    return;
+  }
+
+  if (result.exitCode === STATUS_MISSING) {
+    const action = await vscode.window.showWarningMessage(
+      '⚠️ Some executed migrations have no file (MISSING)',
+      'Show output'
+    );
+    if (action === 'Show output') {
+      outputChannel.show();
+    }
+    return;
+  }
+
+  const pending = (result.output.match(/^\s*down\s+\d+/gm) || []).length;
+  const action = await vscode.window.showWarningMessage(
+    `⏳ ${pending || 'There are'} pending migration${pending === 1 ? '' : 's'}`,
+    'Migrate',
+    'Show output'
+  );
+  if (action === 'Migrate') {
+    await migrate();
+  } else if (action === 'Show output') {
+    outputChannel.show();
+  }
+}
+
 function buildCommand(command: string, config: PhinxConfig): string {
   if (!config.useDocker) {
     return command;
@@ -120,12 +177,17 @@ function buildCommand(command: string, config: PhinxConfig): string {
 
 // Runs a phinx command, streaming its output to the "Phinx" output channel
 // and showing a progress notification until it finishes.
-async function runPhinx(command: string, title: string): Promise<CommandResult> {
+async function runPhinx(
+  command: string,
+  title: string,
+  options: RunOptions = {}
+): Promise<CommandResult> {
+  const successCodes = options.successCodes ?? [0];
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
   if (!workspaceFolder) {
     vscode.window.showErrorMessage('No open workspace folder');
-    return { success: false, output: '' };
+    return { success: false, exitCode: null, output: '' };
   }
 
   const finalCommand = buildCommand(command, getConfig());
@@ -158,15 +220,19 @@ async function runPhinx(command: string, title: string): Promise<CommandResult> 
 
       child.on('error', (error) => {
         outputChannel.appendLine(error.message);
-        resolve({ success: false, output });
+        resolve({ success: false, exitCode: null, output });
       });
 
       child.on('close', (code) => {
         outputChannel.appendLine(`Process exited with code ${code}`);
-        resolve({ success: code === 0, output });
+        resolve({ success: code !== null && successCodes.includes(code), exitCode: code, output });
       });
     })
   );
+
+  if (options.silent && result.success) {
+    return result;
+  }
 
   if (result.success) {
     vscode.window.showInformationMessage(`✅ ${title}: done`);

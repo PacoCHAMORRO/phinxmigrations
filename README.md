@@ -7,6 +7,7 @@ A VSCode extension to streamline the use of **Phinx** in CakePHP, allowing you t
 - 📝 **Create Migration** - Create new migrations with name validation
 - ⬆️ **Migrate** - Execute all pending migrations
 - ⬇️ **Rollback** - Revert the last executed migration
+- 📊 **Status** - Show which migrations are up and which are pending
 - 🐳 **Docker Support** - Compatible with `docker-compose` and `docker exec`
 - 🎯 **Auto-open** - Automatically opens the created migration file
 - ⚙️ **Configurable** - Per-project customization
@@ -33,6 +34,10 @@ Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac) and type "Phinx:" to see availabl
 ### Rollback
 - Reverts the last migration
 - Asks for confirmation before running
+
+### Status
+- Shows the migration status table in the **Phinx** output panel
+- Tells you how many migrations are pending, with a shortcut to run them
 
 ## ⚙️ Configuration
 

@@ -27,6 +27,10 @@
       {
         "command": "phinx.rollback",
         "title": "Phinx: Rollback"
+      },
+      {
+        "command": "phinx.status",
+        "title": "Phinx: Status"
       }
     ],
     "configuration": {

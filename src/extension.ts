@@ -13,7 +13,16 @@ interface PhinxConfig {
   migrationsDirectory: string;
 }
 
+interface CommandResult {
+  success: boolean;
+  output: string;
+}
+
+let outputChannel: vscode.OutputChannel;
+
 export function activate(context: vscode.ExtensionContext) {
+  outputChannel = vscode.window.createOutputChannel('Phinx');
+  context.subscriptions.push(outputChannel);
 
   let createDisposable = vscode.commands.registerCommand(
     'phinx.createMigration',
@@ -65,9 +74,14 @@ async function createMigration() {
   }
 
   const config = getConfig();
-  const command = `${config.phinxPath} create ${migrationName}`;
+  const result = await runPhinx(
+    `${config.phinxPath} create ${migrationName}`,
+    `Creating migration ${migrationName}`
+  );
 
-  executeCommandAndOpen(command, migrationName);
+  if (result.success) {
+    await findAndOpenMigrationFile(config.migrationsDirectory);
+  }
 }
 
 async function migrate() {
@@ -77,7 +91,7 @@ async function migrate() {
   );
 
   if (confirm === 'Yes') {
-    executeCommand(`${getConfig().phinxPath} migrate`);
+    await runPhinx(`${getConfig().phinxPath} migrate`, 'Running migrations');
   }
 }
 
@@ -88,53 +102,95 @@ async function rollback() {
   );
 
   if (confirm === 'Yes') {
-    executeCommand(`${getConfig().phinxPath} rollback`);
+    await runPhinx(`${getConfig().phinxPath} rollback`, 'Rolling back last migration');
   }
 }
 
-async function executeCommandAndOpen(command: string, migrationName: string) {
+function buildCommand(command: string, config: PhinxConfig): string {
+  if (!config.useDocker) {
+    return command;
+  }
+
+  const escapedCommand = command.replace(/"/g, '\\"');
+  if (config.dockerMethod === 'docker') {
+    return `docker exec ${config.dockerContainer} bash -c "${escapedCommand}"`;
+  }
+  return `docker-compose exec -T ${config.dockerComposeService} bash -c "${escapedCommand}"`;
+}
+
+// Runs a phinx command, streaming its output to the "Phinx" output channel
+// and showing a progress notification until it finishes.
+async function runPhinx(command: string, title: string): Promise<CommandResult> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
   if (!workspaceFolder) {
     vscode.window.showErrorMessage('No open workspace folder');
+    return { success: false, output: '' };
+  }
+
+  const finalCommand = buildCommand(command, getConfig());
+
+  outputChannel.show(true);
+  outputChannel.appendLine('');
+  outputChannel.appendLine(`[${new Date().toLocaleTimeString()}] ${title}`);
+  outputChannel.appendLine(`$ ${finalCommand}`);
+
+  const result = await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: `Phinx: ${title}...`
+    },
+    () => new Promise<CommandResult>((resolve) => {
+      let output = '';
+      const child = cp.spawn(finalCommand, {
+        cwd: workspaceFolder.uri.fsPath,
+        shell: true
+      });
+
+      const onData = (data: Buffer) => {
+        const text = data.toString();
+        output += text;
+        outputChannel.append(text);
+      };
+
+      child.stdout.on('data', onData);
+      child.stderr.on('data', onData);
+
+      child.on('error', (error) => {
+        outputChannel.appendLine(error.message);
+        resolve({ success: false, output });
+      });
+
+      child.on('close', (code) => {
+        outputChannel.appendLine(`Process exited with code ${code}`);
+        resolve({ success: code === 0, output });
+      });
+    })
+  );
+
+  if (result.success) {
+    vscode.window.showInformationMessage(`✅ ${title}: done`);
+  } else {
+    const action = await vscode.window.showErrorMessage(
+      `❌ ${title}: failed`,
+      'Show output'
+    );
+    if (action === 'Show output') {
+      outputChannel.show();
+    }
+  }
+
+  return result;
+}
+
+async function findAndOpenMigrationFile(migrationsDirectory: string) {
+  const workspaceDir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+  if (!workspaceDir) {
     return;
   }
 
-  const config = getConfig();
-  let finalCommand = command;
-
-  if (config.useDocker) {
-    const escapedCommand = command.replace(/"/g, '\\"');
-    if (config.dockerMethod === 'docker-compose') {
-      finalCommand = `docker-compose exec -T ${config.dockerComposeService} bash -c "${escapedCommand}"`;
-    } else if (config.dockerMethod === 'docker') {
-      finalCommand = `docker exec ${config.dockerContainer} bash -c "${escapedCommand}"`;
-    }
-  }
-
-  cp.exec(
-    finalCommand,
-    { cwd: workspaceFolder.uri.fsPath },
-    async (error, stdout, stderr) => {
-      if (error) {
-        vscode.window.showErrorMessage(`Error creating migration: ${error.message}`);
-        return;
-      }
-
-      const terminal = vscode.window.createTerminal({
-        name: 'Phinx',
-        cwd: workspaceFolder.uri.fsPath
-      });
-      terminal.show();
-      terminal.sendText(finalCommand);
-
-      await findAndOpenMigrationFile(workspaceFolder.uri.fsPath, migrationName);
-    }
-  );
-}
-
-async function findAndOpenMigrationFile(workspaceDir: string, migrationName: string) {
-  const migrationsDir = path.join(workspaceDir, 'db', 'migrations');
+  const migrationsDir = path.join(workspaceDir, migrationsDirectory);
 
   try {
     if (!fs.existsSync(migrationsDir)) {
@@ -164,57 +220,16 @@ async function findAndOpenMigrationFile(workspaceDir: string, migrationName: str
 
     const mostRecent = filesWithStats.sort((a, b) => b.time - a.time)[0];
 
-    if (!fs.existsSync(mostRecent.path)) {
-      vscode.window.showErrorMessage(`❌ File does not exist: ${mostRecent.path}`);
-      return;
-    }
-
     const document = await vscode.workspace.openTextDocument(mostRecent.path);
     await vscode.window.showTextDocument(document, {
       preview: false,
       viewColumn: vscode.ViewColumn.Active
     });
-
-    vscode.window.showInformationMessage(`✅ Migration created: ${mostRecent.name}`);
   } catch (error) {
     vscode.window.showErrorMessage(
       `Error: ${error instanceof Error ? error.message : 'Unknown'}`
     );
   }
-}
-
-function executeCommand(command: string) {
-  const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-
-  if (!workspaceFolder) {
-    vscode.window.showErrorMessage('No open workspace folder');
-    return;
-  }
-
-  const config = getConfig();
-  let finalCommand = command;
-
-  if (config.useDocker) {
-    const escapedCommand = command.replace(/"/g, '\\"');
-    if (config.dockerMethod === 'docker-compose') {
-      finalCommand = `docker-compose exec -T ${config.dockerComposeService} bash -c "${escapedCommand}"`;
-    } else if (config.dockerMethod === 'docker') {
-      finalCommand = `docker exec ${config.dockerContainer} bash -c "${escapedCommand}"`;
-    }
-  }
-
-  const terminal = vscode.window.createTerminal({
-    name: 'Phinx',
-    cwd: workspaceFolder.uri.fsPath
-  });
-
-  terminal.show();
-  
-  if (config.useDocker) {
-    terminal.sendText(`# Executing in Docker: ${config.dockerMethod}`);
-  }
-  
-  terminal.sendText(finalCommand);
 }
 
 export function deactivate() {}
